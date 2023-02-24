@@ -5,18 +5,35 @@ import sys
 import getopt
 
 
-HELP='Usage json_convert.py -f <path> -m <pretty(default)/raw>'
+HELP='Usage json_converter.py -f <path> -m <pretty(default)/raw>'
 
 class ProcessJson:
     def __init__(self):
         self.max_key_lenght = 0
         self.pretty_dict = []
 
-    def flatten_dict(self, dd, separator='.', prefix=''):
-        return { prefix + separator + k if prefix else k : v
-                for kk, vv in dd.items()
-                for k, v in self.flatten_dict(vv, separator, kk).items()
-                } if isinstance(dd, dict) else { prefix : dd }
+    def flatten_dict(self, dd, separator='.'):
+        out = {}
+
+        def flatten(dd, prevLine=''):
+        # If the Nested key-value
+        # pair is of dict type
+            if type(dd) is dict:
+                for elem in dd:
+                    flatten(dd[elem], prevLine + elem + separator)
+
+        # If the Nested key-value
+        # pair is of list type
+            elif type(dd) is list:
+                i = 0
+                for elem in dd:
+                    flatten(elem, prevLine + str(i) + separator)
+                    i += 1
+            else:
+                out[prevLine[:-1]] = dd
+
+        flatten(dd)
+        return out
 
     def max_element_lenght(self):
         for key in self.dd:
